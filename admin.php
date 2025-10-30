@@ -13,7 +13,7 @@
     <section class="section">
       <div class="container">
         <h1 class="title">Admin-Bereich</h1>
-        <p class="subtitle">Hier kannst du Spiele und verwalten.</p>
+        <p class="subtitle">Hier kannst du Spiele und Kategorien verwalten.</p>
         <div class="notification is-warning">Admin-Funktionen müssen noch implementiert werden.</div>
       </div>
     </section>
