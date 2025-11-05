@@ -11,10 +11,10 @@
   </div>
   <div id="mainNavbar" class="navbar-menu">
     <div class="navbar-center">
-      <a class="navbar-item<?php if(isset($page) && $page==='home') echo ' active'; ?>" href="index.php">Home</a>
-      <a class="navbar-item<?php if(isset($page) && $page==='browse') echo ' active'; ?>" href="browse.php">Browse</a>
-      <a class="navbar-item nav-categories<?php if(isset($page) && $page==='categories') echo ' active'; ?>" href="categories.php">Categories</a>
-      <a class="navbar-item<?php if(isset($page) && $page==='admin') echo ' active'; ?>" href="admin.php">Admin</a>
+      <a class="navbar-item<?php if (isset($page) && $page === 'home') echo ' active'; ?>" href="index.php">Home</a>
+      <a class="navbar-item<?php if (isset($page) && $page === 'browse') echo ' active'; ?>" href="browse.php">Browse</a>
+      <a class="navbar-item nav-categories<?php if (isset($page) && $page === 'categories') echo ' active'; ?>" href="categories.php">Categories</a>
+      <a class="navbar-item<?php if (isset($page) && $page === 'admin') echo ' active'; ?>" href="admin.php">Admin</a>
     </div>
     <div class="navbar-end">
       <div class="brand-buttons">

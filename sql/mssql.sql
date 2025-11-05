@@ -1,0 +1,113 @@
+USE [playhub];
+GO
+
+CREATE TABLE BankAccounts (
+    IBAN VARCHAR(34) PRIMARY KEY,
+    Balance FLOAT
+);
+GO
+
+CREATE TABLE Users (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    BankAccountId VARCHAR(34),
+    FOREIGN KEY (BankAccountId) REFERENCES BankAccounts(IBAN)
+);
+GO
+
+CREATE TABLE Games (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    PublisherId INT NOT NULL,
+    PublishingDate DATETIME,
+    ThumbnailURL VARCHAR(512),
+    Name VARCHAR(255) NOT NULL,
+    Price FLOAT NOT NULL,
+    FOREIGN KEY (PublisherId) REFERENCES Users(ID)
+);
+GO
+
+CREATE TABLE Categories (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Name VARCHAR(255) UNIQUE NOT NULL
+);
+GO
+
+CREATE TABLE GameCategory (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    GameId INT NOT NULL,
+    CategoryId INT NOT NULL,
+    FOREIGN KEY (GameId) REFERENCES Games(ID),
+    FOREIGN KEY (CategoryId) REFERENCES Categories(ID)
+);
+GO
+
+CREATE TABLE UserBibliothek (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    GameId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(ID),
+    FOREIGN KEY (GameId) REFERENCES Games(ID)
+);
+GO
+
+CREATE TABLE Comments (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Content VARCHAR(1024) NOT NULL,
+    PostDate DATETIME DEFAULT GETDATE(),
+    UserId INT NOT NULL,
+    GameId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(ID),
+    FOREIGN KEY (GameId) REFERENCES Games(ID)
+);
+GO
+
+CREATE TABLE UserCommentReview (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Status VARCHAR(10) NOT NULL CHECK (Status IN ('like', 'dislike')),
+    CommentId INT NOT NULL,
+    UserId INT NOT NULL,
+    FOREIGN KEY (CommentId) REFERENCES Comments(ID),
+    FOREIGN KEY (UserId) REFERENCES Users(ID)
+);
+GO
+
+CREATE TABLE Roles (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Name VARCHAR(255) UNIQUE NOT NULL
+);
+GO
+
+CREATE TABLE Permissions (
+    ID INT IDENTITY(1,1) PRIMARY KEY
+);
+GO
+
+CREATE TABLE UserRole (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    RoleId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(ID),
+    FOREIGN KEY (RoleId) REFERENCES Roles(ID)
+);
+GO
+
+CREATE TABLE RolePermission (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    RoleId INT NOT NULL,
+    PermissionId INT NOT NULL,
+    FOREIGN KEY (RoleId) REFERENCES Roles(ID),
+    FOREIGN KEY (PermissionId) REFERENCES Permissions(ID)
+);
+GO
+
+CREATE TABLE TransactionHistory (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    PurchaseDate DATETIME DEFAULT GETDATE(),
+    UserId INT NOT NULL,
+    GameId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(ID),
+    FOREIGN KEY (GameId) REFERENCES Games(ID)
+);
+GO
