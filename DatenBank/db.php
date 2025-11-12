@@ -1,6 +1,5 @@
 <?php
 
-// Database helper using PDO for MySQL (shared connection)
 class Database
 {
     private static $conn = null;
@@ -30,10 +29,9 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]);
             } catch (PDOException $e) {
-                die('Database connection failed: ' . $e->getMessage());
+                die(json_encode(["error" => "Database connection failed", "message" => $e->getMessage()]));
             }
         }
-
         return self::$conn;
     }
 
