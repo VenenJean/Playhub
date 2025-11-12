@@ -1,5 +1,4 @@
 <?php
-
 class Database
 {
     private static $conn = null;
@@ -16,10 +15,9 @@ class Database
                 self::$conn = new PDO("sqlsrv:server=$servername;Database=$database", $username, $password);
                 self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
-                die("Database connection failed: " . $e->getMessage());
+                die(json_encode(["error" => "Database connection failed", "message" => $e->getMessage()]));
             }
         }
-
         return self::$conn;
     }
 }
