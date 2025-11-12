@@ -2,46 +2,46 @@
 <html lang="de" data-theme="dark">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign Up | PlayHub</title>
-  <link rel="icon" href="favicon.svg">
-  <link rel="stylesheet" href="globals.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign Up | PlayHub</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="globals.css">
+    <link rel="stylesheet" href="styles/playhub.css">
 </head>
 
 <body>
-  <?php $page = '';
-  include 'navbar.php'; ?>
-  <section class="section">
-    <div class="container" style="max-width:400px;">
-      <h1 class="title">Sign Up</h1>
-      <form method="post" action="signup.php">
-        <div class="field">
-          <label class="label">Benutzername</label>
-          <div class="control">
-            <input class="input" type="text" name="username" required>
-          </div>
+    <?php $page = '';
+    include 'navbar.php'; ?>
+    <section class="section">
+        <div class="container" style="max-width:400px;">
+            <h1 class="title">Sign Up</h1>
+            <form method="post" action="signup.php">
+                <div class="field">
+                    <label class="label">Benutzername</label>
+                    <div class="control">
+                        <input class="input" type="text" name="username" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">E-Mail</label>
+                    <div class="control">
+                        <input class="input" type="email" name="email" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Passwort</label>
+                    <div class="control">
+                        <input class="input" type="password" name="password" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <button class="button is-warning" type="submit">Registrieren</button>
+                </div>
+            </form>
         </div>
-        <div class="field">
-          <label class="label">E-Mail</label>
-          <div class="control">
-            <input class="input" type="email" name="email" required>
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Passwort</label>
-          <div class="control">
-            <input class="input" type="password" name="password" required>
-          </div>
-        </div>
-        <div class="field">
-          <button class="button is-warning" type="submit">Registrieren</button>
-        </div>
-      </form>
-    </div>
-  </section>
-  <script src="navbar.js"></script>
+    </section>
+    <script src="navbar.js"></script>
 </body>
 
 </html>

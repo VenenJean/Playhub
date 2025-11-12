@@ -7,27 +7,31 @@
     <title>Kategorien | PlayHub</title>
     <link rel="icon" href="favicon.svg">
     <link rel="stylesheet" href="globals.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="styles/playhub.css">
 </head>
 
 <body>
     <?php
-    $host = 'db5018764785.hosting-data.io';
-    $user = 'dbu2235954';
-    $pass = 'PHub%2025!';
-    $db = 'dbs14835705';
-    $conn = new mysqli($host, $user, $pass, $db);
-    if ($conn->connect_error) {
-        die('Verbindung fehlgeschlagen: ' . $conn->connect_error);
-    }
-    $categories = $conn->query("SELECT Name FROM Categories ORDER BY Name ASC");
+    include 'db.php';
+    $conn = Database::getConnection();
+    $stmtCats = $conn->query("SELECT Name FROM Categories ORDER BY Name ASC");
+    $categories = $stmtCats->fetchAll();
     $selectedCat = isset($_GET['cat']) ? $_GET['cat'] : null;
     $games = null;
     if ($selectedCat) {
-        $stmt = $conn->prepare("SELECT Games.ID, Games.Name, Games.ThumbnailURL, Games.Price, Users.Name AS Publisher FROM Games JOIN Users ON Games.PublisherId = Users.ID JOIN GameCategories ON Games.ID = GameCategories.GameId JOIN Categories ON GameCategories.CategoryId = Categories.ID WHERE Categories.Name = ? ORDER BY PublishingDate DESC");
-        $stmt->bind_param('s', $selectedCat);
-        $stmt->execute();
-        $games = $stmt->get_result();
+        if ($selectedCat) {
+            $stmt = $conn->prepare("
+                SELECT Games.ID, Games.Name, Games.ThumbnailURL, Games.Price, Users.Name AS Publisher
+                FROM Games
+                JOIN Users ON Games.PublisherId = Users.ID
+                JOIN GameCategory ON Games.ID = GameCategory.GameId
+                JOIN Categories ON GameCategory.CategoryId = Categories.ID
+                WHERE Categories.Name = :cat
+                ORDER BY PublishingDate DESC
+            ");
+            $stmt->execute([':cat' => $selectedCat]);
+            $games = $stmt->fetchAll();
+        }
     }
     $page = 'categories';
     ?>
@@ -36,10 +40,10 @@
         <div class="container">
             <h1 class="title">Kategorien</h1>
             <div class="tags">
-                <?php if ($categories && $categories->num_rows > 0): ?>
-                    <?php while ($cat = $categories->fetch_assoc()): ?>
+                <?php if ($categories && count($categories) > 0): ?>
+                    <?php foreach ($categories as $cat): ?>
                         <a href="categories.php?cat=<?= urlencode($cat['Name']) ?>" class="tag is-warning is-medium" style="margin-bottom:6px; text-decoration:none;<?= ($selectedCat === $cat['Name']) ? ' font-weight:bold; background:#FF9000; color:#000;' : '' ?>"> <?= htmlspecialchars($cat['Name']) ?> </a>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <span>Keine Kategorien vorhanden.</span>
                 <?php endif; ?>
@@ -48,8 +52,8 @@
                 <hr>
                 <h2 class="subtitle">Spiele in "<?= htmlspecialchars($selectedCat) ?>"</h2>
                 <div class="columns is-multiline">
-                    <?php if ($games && $games->num_rows > 0): ?>
-                        <?php while ($game = $games->fetch_assoc()): ?>
+                    <?php if ($games && count($games) > 0): ?>
+                        <?php foreach ($games as $game): ?>
                             <div class="column is-one-fifth">
                                 <a href="game.php?id=<?= urlencode($game['ID']) ?>" style="text-decoration:none; color:inherit;">
                                     <div class="card is-clickable" style="cursor:pointer;">
@@ -66,7 +70,7 @@
                                     </div>
                                 </a>
                             </div>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <p>Keine Spiele in dieser Kategorie gefunden.</p>
                     <?php endif; ?>
@@ -74,7 +78,7 @@
             <?php endif; ?>
         </div>
     </section>
-    <?php $conn->close(); ?>
+    <?php Database::close(); ?>
     <script src="navbar.js"></script>
 </body>
 
