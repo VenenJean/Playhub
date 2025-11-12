@@ -19,9 +19,19 @@
     $selectedCat = isset($_GET['cat']) ? $_GET['cat'] : null;
     $games = null;
     if ($selectedCat) {
-        $stmt = $conn->prepare("SELECT Games.ID, Games.Name, Games.ThumbnailURL, Games.Price, Users.Name AS Publisher FROM Games JOIN Users ON Games.PublisherId = Users.ID JOIN GameCategories ON Games.ID = GameCategories.GameId JOIN Categories ON GameCategories.CategoryId = Categories.ID WHERE Categories.Name = :cat ORDER BY PublishingDate DESC");
-        $stmt->execute([':cat' => $selectedCat]);
-        $games = $stmt->fetchAll();
+        if ($selectedCat) {
+            $stmt = $conn->prepare("
+                SELECT Games.ID, Games.Name, Games.ThumbnailURL, Games.Price, Users.Name AS Publisher
+                FROM Games
+                JOIN Users ON Games.PublisherId = Users.ID
+                JOIN GameCategory ON Games.ID = GameCategory.GameId
+                JOIN Categories ON GameCategory.CategoryId = Categories.ID
+                WHERE Categories.Name = :cat
+                ORDER BY PublishingDate DESC
+            ");
+            $stmt->execute([':cat' => $selectedCat]);
+            $games = $stmt->fetchAll();
+        }
     }
     $page = 'categories';
     ?>
