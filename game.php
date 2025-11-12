@@ -12,7 +12,7 @@
 
 <body>
     <?php
-    include 'db.php';
+    include 'DatenBank/db.php';
     $conn = Database::getConnection();
     $game = null;
     if (isset($_GET['id'])) {

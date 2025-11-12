@@ -12,7 +12,7 @@
 
 <body>
     <?php
-    include 'db.php';
+    include 'DatenBank/db.php';
     $conn = Database::getConnection();
     $stmtCats = $conn->query("SELECT Name FROM Categories ORDER BY Name ASC");
     $categories = $stmtCats->fetchAll();

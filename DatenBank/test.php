@@ -10,7 +10,7 @@
 <body>
     <h1>Database Insert Example</h1>
     <?php
-    include 'db.php';
+    include 'DatenBank/db.php';
 
     try {
         $sql = "INSERT INTO BankAccounts (IBAN, Balance) VALUES ('testiban', 1000)";

@@ -12,7 +12,7 @@
 
 <body>
     <?php
-    include 'db.php';
+    include 'DatenBank/db.php';
     $conn = Database::getConnection();
     $stmtG = $conn->query("SELECT TOP 5 Games.ID, Games.Name, Games.ThumbnailURL, Games.Price, Users.Name AS Publisher FROM Games JOIN Users ON Games.PublisherId = Users.ID ORDER BY PublishingDate DESC");
     $games = $stmtG->fetchAll();
