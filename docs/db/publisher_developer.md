@@ -219,3 +219,87 @@ contributors_games
 ---
 
 If you tell me whether you want **maximum flexibility** (Option 1) or **simplest schema for now** (Option 2), I can show you the exact SQL version suited for your current design. Which would you prefer?
+
+
+
+
+
+
+
+
+
+
+Hm, so it means that roles from the roles table and them "imaginary" roles as a developer or studio are separate things? one specify the access on the website and the other the ownership / publishing of the game?  (maybe the 2nd one needs better rephrasing xD)
+
+
+
+
+
+
+
+
+
+
+Exactly ✅ — you’ve nailed it, and your rephrasing is already quite good!
+Let me clarify the distinction in simple, precise terms 👇
+
+---
+
+### 🔹 1. **RBAC roles** (from your `rbac.roles` table)
+
+These are **access-control roles** — they define what a user **can do on the platform** (permissions, admin rights, moderation, etc.).
+
+Examples:
+
+| Role                | Purpose                                           |
+| ------------------- | ------------------------------------------------- |
+| `admin`             | Full system access, can manage users, games, etc. |
+| `moderator`         | Can approve reviews, moderate discussions         |
+| `publisher_account` | Can upload and manage published games             |
+| `user`              | Regular player, can buy/review games              |
+
+So RBAC roles are about **capabilities within the web app**.
+They don’t affect who “owns” or “created” a game.
+
+---
+
+### 🔹 2. **Developer / Publisher roles** (in `developers_games` and `publishers_games`)
+
+These are **domain roles** — they define **relationships to specific games**, not system access.
+
+Examples:
+
+| Game            | Developer         | Publisher         |
+| --------------- | ----------------- | ----------------- |
+| *Hollow Knight* | Team Cherry       | Team Cherry       |
+| *DOOM*          | id Software       | Bethesda          |
+| *Celeste*       | Maddy Makes Games | Maddy Makes Games |
+
+So these describe **ownership**, **authorship**, or **credit**, not permissions.
+
+---
+
+### 💡 Analogy
+
+Think of it like this:
+
+| Context                | Role Example                 | What it Controls                              |
+| ---------------------- | ---------------------------- | --------------------------------------------- |
+| **RBAC system**        | “admin”, “user”, “moderator” | what actions a person can perform in your app |
+| **Game relationships** | “developer”, “publisher”     | who made or released a particular game        |
+
+They’re totally separate systems that happen to both use the word “role.”
+You could rename the RBAC ones to **“system_roles”** if you want to avoid confusion.
+
+---
+
+### 🔧 Optional clarity improvements
+
+To make things extra clear, you could:
+
+* Rename the RBAC tables to `auth_roles`, `auth_permissions`, etc.
+* Or rename the developer/publisher relationships as **game_credits** or **game_roles**, with a `type` field (developer/publisher).
+
+---
+
+Would you like me to show how you could slightly rename or restructure your RBAC tables to make this separation clearer?
