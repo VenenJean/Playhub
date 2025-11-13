@@ -1,0 +1,108 @@
+table studios {
+  id int pk
+  name string
+  description string
+  user_id int [ref: > users.id]
+}
+
+table users {
+  id int pk
+  username string
+  email string
+  password string
+  balance double
+}
+
+table rbac.users_roles {
+  id int pk
+  user_id int [ref: > users.id]
+  role_id int [ref: > rbac.roles.id]
+}
+
+table rbac.roles {
+  id int pk
+  name string
+}
+
+table rbac.roles_permissions {
+  id int pk
+  role_id int [ref: > rbac.roles.id]
+  permission_id int [ref: > rbac.permissions.id]
+}
+
+table rbac.permissions {
+  id int pk
+  name string
+  description string
+}
+
+table users_games {
+  id int pk
+  user_id int [ref: > users.id]
+  game_id int [ref: > games.id]
+  buy_datetime datetime
+}
+
+table games {
+  id int pk
+  name string
+  description string
+  thumbnail_path string
+  price double
+  publish_datetime datetime
+}
+
+table games_categories {
+  id int pk
+  game_id int [ref: > games.id]
+  category_id int [ref: > categories.id]
+}
+
+table categories {
+  id int pk
+  name string
+}
+
+table reviews {
+  id int pk
+  user_id int [ref: > users.id]
+  game_id int [ref: > games.id]
+  review_datetime datetime
+  stars int
+  content string
+}
+
+table games_platforms {
+  id int pk
+  game_id int [ref: > games.id]
+  platform_id int [ref: > platforms.id]
+}
+
+table platforms {
+  id int pk
+  name string
+}
+
+table wishlists {
+  id int pk
+  user_id int [ref: > users.id]
+  game_id int [ref: > games.id]
+  added_datetime datetime
+}
+
+
+// symbolises who is the developer of the game
+table developers_games {
+  id int pk
+  game_id int [ref: > games.id]
+  user_id int [ref: > users.id, null] // nullable, if developed by a user
+  studio_id int [ref: > studios.id, null] // nullable, if developed by a studio
+}
+
+// symbolises who is the publisher of the game
+table publishers_games {
+  id int pk
+  game_id int [ref: > games.id]
+  user_id int [ref: > users.id, null] // nullable, if published by a user
+  studio_id int [ref: > studios.id, null] // nullable, if published by a studio
+}
