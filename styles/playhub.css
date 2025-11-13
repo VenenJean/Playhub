@@ -90,6 +90,7 @@ body {
 .brand-buttons {
   display: flex;
   gap: 8px;
+  text-decoration: none;
 }
 .brand-buttons .button {
   font-weight: 600;

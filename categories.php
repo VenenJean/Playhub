@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kategorien | PlayHub</title>
     <link rel="icon" href="favicon.svg">
-    <link rel="stylesheet" href="globals.css">
+    
     <link rel="stylesheet" href="styles/playhub.css">
 </head>
 
