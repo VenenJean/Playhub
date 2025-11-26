@@ -111,7 +111,7 @@
     </main>
 
     <script>
-        const apiUrl = "api.php";
+        const apiUrl = "../database/api.php";
         const tableSelect = document.getElementById("table");
         const output = document.getElementById("output");
         const editor = document.getElementById("editor");
