@@ -12,7 +12,7 @@
 
 <body>
     <?php $page = '';
-    include '../public/navbar.php'; ?>
+    include '../navbar.php'; ?>
     <section class="section">
         <div class="container" style="max-width:400px;">
             <h1 class="title">Sign In</h1>
