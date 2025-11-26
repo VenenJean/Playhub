@@ -1,113 +1,153 @@
-USE [playhub];
-GO
+use playhub_hrbac;
 
-CREATE TABLE BankAccounts (
-    IBAN VARCHAR(34) PRIMARY KEY,
-    Balance FLOAT
-);
-GO
+CREATE TABLE
+    public_users (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        username NVARCHAR (255) NOT NULL,
+        email NVARCHAR (255) NOT NULL,
+        password NVARCHAR (255) NOT NULL,
+        balance FLOAT
+    );
 
-CREATE TABLE Users (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    Name VARCHAR(255) NOT NULL,
-    Password VARCHAR(255) NOT NULL,
-    Email VARCHAR(255) UNIQUE NOT NULL,
-    BankAccountId VARCHAR(34),
-    FOREIGN KEY (BankAccountId) REFERENCES BankAccounts(IBAN)
-);
-GO
+CREATE TABLE
+    public_games (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL,
+        description NVARCHAR (MAX),
+        thumbnail_path NVARCHAR (255),
+        price FLOAT,
+        publish_datetime DATETIME
+    );
 
-CREATE TABLE Games (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    PublisherId INT NOT NULL,
-    PublishingDate DATETIME,
-    ThumbnailURL VARCHAR(512),
-    Name VARCHAR(255) NOT NULL,
-    Price FLOAT NOT NULL,
-    FOREIGN KEY (PublisherId) REFERENCES Users(ID)
-);
-GO
+CREATE TABLE
+    public_reviews (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        game_id INT NOT NULL,
+        review_datetime DATETIME,
+        stars INT,
+        content NVARCHAR (MAX),
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (game_id) REFERENCES public_games (id)
+    );
 
-CREATE TABLE Categories (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    Name VARCHAR(255) UNIQUE NOT NULL
-);
-GO
+CREATE TABLE
+    public_users_games (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        game_id INT NOT NULL,
+        buy_datetime DATETIME,
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (game_id) REFERENCES public_games (id)
+    );
 
-CREATE TABLE GameCategory (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    GameId INT NOT NULL,
-    CategoryId INT NOT NULL,
-    FOREIGN KEY (GameId) REFERENCES Games(ID),
-    FOREIGN KEY (CategoryId) REFERENCES Categories(ID)
-);
-GO
+CREATE TABLE
+    public_wishlists (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        game_id INT NOT NULL,
+        added_datetime DATETIME,
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (game_id) REFERENCES public_games (id)
+    );
 
-CREATE TABLE UserBibliothek (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    GameId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(ID),
-    FOREIGN KEY (GameId) REFERENCES Games(ID)
-);
-GO
+CREATE TABLE
+    public_studios (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL,
+        description NVARCHAR (MAX),
+        user_id INT,
+        FOREIGN KEY (user_id) REFERENCES public_users (id)
+    );
 
-CREATE TABLE Comments (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    Content VARCHAR(1024) NOT NULL,
-    PostDate DATETIME DEFAULT GETDATE(),
-    UserId INT NOT NULL,
-    GameId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(ID),
-    FOREIGN KEY (GameId) REFERENCES Games(ID)
-);
-GO
+CREATE TABLE
+    public_publishers_games (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        game_id INT NOT NULL,
+        studio_id INT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (game_id) REFERENCES public_games (id),
+        FOREIGN KEY (studio_id) REFERENCES public_studios (id)
+    );
 
-CREATE TABLE UserCommentReview (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    Status VARCHAR(10) NOT NULL CHECK (Status IN ('like', 'dislike')),
-    CommentId INT NOT NULL,
-    UserId INT NOT NULL,
-    FOREIGN KEY (CommentId) REFERENCES Comments(ID),
-    FOREIGN KEY (UserId) REFERENCES Users(ID)
-);
-GO
+CREATE TABLE
+    public_developers_games (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        game_id INT NOT NULL,
+        studio_id INT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (game_id) REFERENCES public_games (id),
+        FOREIGN KEY (studio_id) REFERENCES public_studios (id)
+    );
 
-CREATE TABLE Roles (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    Name VARCHAR(255) UNIQUE NOT NULL
-);
-GO
+CREATE TABLE
+    game_categories (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL
+    );
 
-CREATE TABLE Permissions (
-    ID INT IDENTITY(1,1) PRIMARY KEY
-);
-GO
+CREATE TABLE
+    game_games_categories (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        game_id INT NOT NULL,
+        category_id INT NOT NULL,
+        FOREIGN KEY (game_id) REFERENCES public_games (id),
+        FOREIGN KEY (category_id) REFERENCES game_categories (id)
+    );
 
-CREATE TABLE UserRole (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    RoleId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(ID),
-    FOREIGN KEY (RoleId) REFERENCES Roles(ID)
-);
-GO
+CREATE TABLE
+    game_platforms (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL
+    );
 
-CREATE TABLE RolePermission (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    RoleId INT NOT NULL,
-    PermissionId INT NOT NULL,
-    FOREIGN KEY (RoleId) REFERENCES Roles(ID),
-    FOREIGN KEY (PermissionId) REFERENCES Permissions(ID)
-);
-GO
+CREATE TABLE
+    game_games_platforms (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        game_id INT NOT NULL,
+        platform_id INT NOT NULL,
+        FOREIGN KEY (game_id) REFERENCES public_games (id),
+        FOREIGN KEY (platform_id) REFERENCES game_platforms (id)
+    );
 
-CREATE TABLE TransactionHistory (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    PurchaseDate DATETIME DEFAULT GETDATE(),
-    UserId INT NOT NULL,
-    GameId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(ID),
-    FOREIGN KEY (GameId) REFERENCES Games(ID)
-);
-GO
+CREATE TABLE
+    hrbac_roles (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL
+    );
+
+CREATE TABLE
+    hrbac_permissions (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        name NVARCHAR (255) NOT NULL,
+        description NVARCHAR (MAX)
+    );
+
+CREATE TABLE
+    hrbac_users_roles (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        user_id INT NOT NULL,
+        role_id INT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES public_users (id),
+        FOREIGN KEY (role_id) REFERENCES hrbac_roles (id)
+    );
+
+CREATE TABLE
+    hrbac_roles_inherits (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        parent_role_id INT NOT NULL,
+        child_role_id INT NOT NULL,
+        FOREIGN KEY (parent_role_id) REFERENCES hrbac_roles (id),
+        FOREIGN KEY (child_role_id) REFERENCES hrbac_roles (id)
+    );
+
+CREATE TABLE
+    hrbac_roles_permissions (
+        id INT PRIMARY KEY IDENTITY (1, 1),
+        role_id INT NOT NULL,
+        permission_id INT NOT NULL,
+        FOREIGN KEY (role_id) REFERENCES hrbac_roles (id),
+        FOREIGN KEY (permission_id) REFERENCES hrbac_permissions (id)
+    );
