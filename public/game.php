@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Spiel | PlayHub</title>
-    <link rel="icon" href="../public/graphics/favicon.svg">
+    <link rel="icon" href="graphics/favicon.svg">
 
     <link rel="stylesheet" href="styles/playhub.css">
 </head>
