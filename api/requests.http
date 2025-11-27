@@ -1,0 +1,53 @@
+### BASE URL
+@api = http://localhost/PlayHub/api/index.php
+
+
+############################################################
+# 1) GET ALL USERS
+############################################################
+GET {{api}}?table=public_users
+Accept: application/json
+
+
+
+############################################################
+# 2) GET USER BY ID
+############################################################
+GET {{api}}?table=public_users&id=4
+Accept: application/json
+
+
+
+############################################################
+# 3) CREATE NEW USER
+############################################################
+POST {{api}}?table=public_users
+Content-Type: application/json
+
+{
+    "username": "new_user",
+    "email": "new_user@example.com",
+    "password": "hashed_pw_new",
+    "balance": 50.75
+}
+
+
+
+############################################################
+# 4) UPDATE EXISTING USER
+############################################################
+PUT {{api}}?table=public_users&id=5
+Content-Type: application/json
+
+{
+    "email": "updated_email@example.com",
+    "balance": 999.99
+}
+
+
+
+############################################################
+# 5) DELETE USER
+############################################################
+DELETE {{api}}?table=public_users&id=5
+Accept: application/json
