@@ -10,7 +10,7 @@
     <?php if (!empty($message))
         echo "<p>$message</p>"; ?>
     <h2>Kategorie hinzufügen</h2>
-    <form method="post" action="db1.php">
+    <form method="post" action="../database/db1.php">
         <input name="category_name" type="text" placeholder="Kategorie" required>
         <button type="submit">Hinzufügen</button>
     </form>

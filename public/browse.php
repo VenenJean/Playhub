@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Alle Spiele | PlayHub</title>
-    <link rel="icon" href="favicon.svg">
+    <link rel="icon" href="graphics/favicon.svg">
 
     <link rel="stylesheet" href="styles/playhub.css">
 </head>
@@ -51,7 +51,7 @@
         </div>
     </section>
     <?php Database::close(); ?>
-    <script src="../public/js/navbar.js"></script>
+    <script src="js/navbar.js"></script>
 </body>
 
 </html>

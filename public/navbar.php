@@ -8,18 +8,18 @@
     </div>
     <div id="mainNavbar" class="navbar-menu">
         <div class="navbar-center">
-            <a class="navbar-item" href="index.php">
-                <img src="graphics/playhub-banner.svg" alt="PlayHub">
+            <a class="navbar-item" href="/PlayHub/public/index.php">
+                <img src="/PlayHub/public/graphics/playhub-banner.svg" alt="PlayHub">
             </a>
-            <a class="navbar-item<?php if (isset($page) && $page === 'home') echo ' active'; ?>" href="index.php">Home</a>
-            <a class="navbar-item<?php if (isset($page) && $page === 'browse') echo ' active'; ?>" href="browse.php">Browse</a>
-            <a class="navbar-item nav-categories<?php if (isset($page) && $page === 'categories') echo ' active'; ?>" href="categories.php">Categories</a>
-            <a class="navbar-item<?php if (isset($page) && $page === 'admin') echo ' active'; ?>" href="admin/admin.php">Admin</a>
+            <a class="navbar-item<?php if (isset($page) && $page === 'home') echo ' active'; ?>" href="/PlayHub/public/index.php">Home</a>
+            <a class="navbar-item<?php if (isset($page) && $page === 'browse') echo ' active'; ?>" href="/PlayHub/public/browse.php">Browse</a>
+            <a class="navbar-item nav-categories<?php if (isset($page) && $page === 'categories') echo ' active'; ?>" href="/PlayHub/public/categories.php">Categories</a>
+            <a class="navbar-item<?php if (isset($page) && $page === 'admin') echo ' active'; ?>" href="/PlayHub/admin/admin.php">Admin</a>
         </div>
         <div class="navbar-end">
             <div class="brand-buttons">
-                <a class="button sign-in" href="sign/signin.php">Sign In</a>
-                <a class="button sign-up" href="sign/signup.php">Sign Up</a>
+                <a class="button sign-in" href="/PlayHub/public/sign/signin.php">Sign In</a>
+                <a class="button sign-up" href="/PlayHub/public/sign/signup.php">Sign Up</a>
             </div>
         </div>
     </div>
