@@ -1,0 +1,33 @@
+tbl_public_users: (PK_id, username, email, password, balance)
+
+tbl_public_games: (PK_id, name, description, thumbnail_path, price, publish_datetime)
+
+tbl_public_reviews: (PK_id, ↑FK_user_id, ↑FK_game_id, review_datetime, stars, content)
+
+tbl_public_users_games: (PK_id, ↑FK_user_id, ↑FK_game_id, buy_datetime)
+
+tbl_public_wishlists: (PK_id, ↑FK_user_id, ↑FK_game_id, added_datetime)
+
+tbl_public_studios: (PK_id, name, description, ↑FK_user_id)
+
+tbl_public_publishers_games: (PK_id, ↑FK_user_id, ↑FK_game_id, ↑FK_studio_id)
+
+tbl_public_developers_games: (PK_id, ↑FK_user_id, ↑FK_game_id, ↑FK_studio_id)
+
+tbl_game_categories: (PK_id, name)
+
+tbl_game_games_categories: (PK_id, ↑FK_game_id, ↑FK_category_id)
+
+tbl_game_platforms: (PK_id, name)
+
+tbl_game_games_platforms: (PK_id, ↑FK_game_id, ↑FK_platform_id)
+
+tbl_hrbac_roles: (PK_id, name)
+
+tbl_hrbac_permissions: (PK_id, name, description)
+
+tbl_hrbac_users_roles: (PK_id, ↑FK_user_id, ↑FK_role_id)
+
+tbl_hrbac_roles_inherits: (PK_id, ↑FK_parent_role_id, ↑FK_child_role_id)
+
+tbl_hrbac_roles_permissions: (PK_id, ↑FK_role_id, ↑FK_permission_id)
