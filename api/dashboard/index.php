@@ -151,7 +151,6 @@ $apiUrl = "../index.php"; // adjust if API is in a different folder
                     },
                     body: JSON.stringify(formData)
                 })
-                .then(r => r.json())
                 .then(() => location.reload());
         }
 
