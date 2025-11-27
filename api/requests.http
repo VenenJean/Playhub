@@ -49,5 +49,5 @@ Content-Type: application/json
 ############################################################
 # 5) DELETE USER
 ############################################################
-DELETE {{api}}?table=public_users&id=5
+DELETE {{api}}?table=public_users&id=4
 Accept: application/json
