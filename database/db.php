@@ -18,7 +18,7 @@ class Database
             $host = "(localdb)\\MSSQLLocalDB";
             $user = "php_user";
             $pass = "StrongPassword123!";
-            $db = "playhub_hrbac";
+            $db = "playhub_hrac";
 
             $dsn = "sqlsrv:server=$host;Database=$db;";
 

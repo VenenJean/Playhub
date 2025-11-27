@@ -1,6 +1,6 @@
 <?php
 $serverName = "(localdb)\MSSQLLocalDB";
-$database = "playhub";
+$database = "playhub_hrac";
 $username = "admin";
 $password = "admin";
 $message = "";
