@@ -1,6 +1,5 @@
 <?php
 require_once 'db.php';
-
 header("Content-Type: application/json; charset=UTF-8");
 
 $table = $_GET['table'] ?? null;
@@ -17,19 +16,23 @@ class API
 {
     private $conn;
     private array $allowedTables = [
-        "BankAccounts",
-        "Users",
-        "Games",
-        "Categories",
-        "GameCategory",
-        "UserBibliothek",
-        "Comments",
-        "UserCommentReview",
-        "Roles",
-        "Permissions",
-        "UserRole",
-        "RolePermission",
-        "TransactionHistory"
+        "public_users",
+        "public_games",
+        "public_reviews",
+        "public_users_games",
+        "public_wishlists",
+        "public_studios",
+        "public_publishers_games",
+        "public_developers_games",
+        "game_categories",
+        "game_games_categories",
+        "game_platforms",
+        "game_games_platforms",
+        "hrbac_roles",
+        "hrbac_permissions",
+        "hrbac_users_roles",
+        "hrbac_roles_inherits",
+        "hrbac_roles_permissions"
     ];
 
     public function __construct()
@@ -41,51 +44,30 @@ class API
     {
         $schema = null;
         $name = $table;
-        if (strpos($table, '.') !== false) {
-            [$schema, $name] = explode('.', $table, 2);
-        }
-
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $name) || ($schema !== null && !preg_match('/^[A-Za-z0-9_]+$/', $schema))) {
+        if (strpos($table, '.') !== false) [$schema, $name] = explode('.', $table, 2);
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $name) || ($schema && !preg_match('/^[A-Za-z0-9_]+$/', $schema))) {
             http_response_code(400);
-            echo json_encode(["error" => "Invalid table name or schema"]);
+            echo json_encode(["error" => "Invalid table name"]);
             exit;
         }
-
         if (!in_array($name, $this->allowedTables, true)) {
             http_response_code(400);
             echo json_encode(["error" => "Table not allowed"]);
             exit;
         }
-
-        $qualified = $schema !== null ? "[$schema].[$name]" : "[$name]";
+        $qualified = $schema ? "[$schema].[$name]" : "[$name]";
         return ['name' => $name, 'schema' => $schema, 'qualified' => $qualified];
     }
 
     private function getPrimaryKey(string $tableName): string
     {
-        $primaryKeys = [
-            "BankAccounts" => "IBAN",
-            "Users" => "ID",
-            "Games" => "ID",
-            "Categories" => "ID",
-            "GameCategory" => "ID",
-            "UserBibliothek" => "ID",
-            "Comments" => "ID",
-            "UserCommentReview" => "ID",
-            "Roles" => "ID",
-            "Permissions" => "ID",
-            "UserRole" => "ID",
-            "RolePermission" => "ID",
-            "TransactionHistory" => "ID"
-        ];
-        return $primaryKeys[$tableName] ?? "ID";
+        return "id";
     }
 
     public function getAll(string $table): array
     {
         $info = $this->normalizeTable($table);
-        $sql = "SELECT * FROM " . $info['qualified'];
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("SELECT * FROM " . $info['qualified']);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -93,9 +75,7 @@ class API
     public function getById(string $table, $id): array|false
     {
         $info = $this->normalizeTable($table);
-        $pk = $this->getPrimaryKey($info['name']);
-        $sql = "SELECT * FROM " . $info['qualified'] . " WHERE [$pk] = :id";
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("SELECT * FROM " . $info['qualified'] . " WHERE [id] = :id");
         $stmt->bindValue(":id", $id);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -103,7 +83,7 @@ class API
 
     private function validateColumnName(string $col): bool
     {
-        return (bool)preg_match('/^[A-Za-z0-9_]+$/', $col);
+        return preg_match('/^[A-Za-z0-9_]+$/', $col);
     }
 
     public function create(string $table, array $data): mixed
@@ -127,21 +107,23 @@ class API
 
         $columnsEscaped = '[' . implode('], [', $cols) . ']';
         $placeholders = ':' . implode(', :', $cols);
+
         $sql = "INSERT INTO " . $info['qualified'] . " ($columnsEscaped) VALUES ($placeholders)";
         $stmt = $this->conn->prepare($sql);
-
         foreach ($data as $key => $value) {
             $stmt->bindValue(":$key", $value);
         }
-
         $stmt->execute();
 
         try {
-            return $this->conn->lastInsertId();
+            $idStmt = $this->conn->query("SELECT SCOPE_IDENTITY() AS id");
+            $idRow = $idStmt->fetch(PDO::FETCH_ASSOC);
+            return $idRow['id'] ?? true;
         } catch (Exception $e) {
             return true;
         }
     }
+
 
     public function update(string $table, $id, array $data): bool
     {
@@ -151,87 +133,70 @@ class API
             echo json_encode(["error" => "No data provided"]);
             exit;
         }
-
-        $pk = $this->getPrimaryKey($info['name']);
-
         $fields = [];
-        foreach ($data as $key => $value) {
-            if (!$this->validateColumnName($key)) {
+        foreach ($data as $k => $v) {
+            if (!$this->validateColumnName($k)) {
                 http_response_code(400);
-                echo json_encode(["error" => "Invalid column name: $key"]);
+                echo json_encode(["error" => "Invalid column: $k"]);
                 exit;
             }
-            $fields[] = "[$key] = :$key";
+            $fields[] = "[$k] = :$k";
         }
-        $setPart = implode(", ", $fields);
-
-        $sql = "UPDATE " . $info['qualified'] . " SET $setPart WHERE [$pk] = :id";
-        $stmt = $this->conn->prepare($sql);
-
-        foreach ($data as $key => $value) {
-            $stmt->bindValue(":$key", $value);
-        }
+        $stmt = $this->conn->prepare("UPDATE " . $info['qualified'] . " SET " . implode(", ", $fields) . " WHERE [id]=:id");
+        foreach ($data as $k => $v) $stmt->bindValue(":$k", $v);
         $stmt->bindValue(":id", $id);
-
         return $stmt->execute();
     }
 
     public function delete(string $table, $id): bool
     {
         $info = $this->normalizeTable($table);
-        $pk = $this->getPrimaryKey($info['name']);
-        $sql = "DELETE FROM " . $info['qualified'] . " WHERE [$pk] = :id";
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("DELETE FROM " . $info['qualified'] . " WHERE [id]=:id");
         $stmt->bindValue(":id", $id);
         return $stmt->execute();
     }
 }
 
 $api = new API();
-
 switch ($method) {
     case "GET":
-        $result = $id ? $api->getById($table, $id) : $api->getAll($table);
-        echo json_encode($result);
+        $res = $id ? $api->getById($table, $id) : $api->getAll($table);
+        echo json_encode($res);
         break;
-
     case "POST":
         $input = json_decode(file_get_contents("php://input"), true);
         if (!is_array($input) || empty($input)) {
             http_response_code(400);
-            echo json_encode(["error" => "Invalid or empty JSON body"]);
+            echo json_encode(["error" => "Invalid/empty JSON"]);
             exit;
         }
         $newId = $api->create($table, $input);
         echo json_encode(["success" => true, "id" => $newId]);
         break;
-
     case "PUT":
         if (!$id) {
             http_response_code(400);
-            echo json_encode(["error" => "Missing id parameter"]);
+            echo json_encode(["error" => "Missing id"]);
             exit;
         }
         $input = json_decode(file_get_contents("php://input"), true);
         if (!is_array($input) || empty($input)) {
             http_response_code(400);
-            echo json_encode(["error" => "Invalid or empty JSON body"]);
+            echo json_encode(["error" => "Invalid/empty JSON"]);
             exit;
         }
-        $result = $api->update($table, $id, $input);
-        echo json_encode(["success" => $result]);
+        $res = $api->update($table, $id, $input);
+        echo json_encode(["success" => $res]);
         break;
-
     case "DELETE":
         if (!$id) {
             http_response_code(400);
-            echo json_encode(["error" => "Missing id parameter"]);
+            echo json_encode(["error" => "Missing id"]);
             exit;
         }
-        $result = $api->delete($table, $id);
-        echo json_encode(["success" => $result]);
+        $res = $api->delete($table, $id);
+        echo json_encode(["success" => $res]);
         break;
-
     default:
         http_response_code(405);
         echo json_encode(["error" => "Method not allowed"]);

@@ -1,6 +1,3 @@
-<?php
-// api-dashboard.php
-?>
 <!DOCTYPE html>
 <html lang="de">
 
@@ -85,33 +82,38 @@
         <label for="table">Tabelle wählen:</label>
         <select id="table">
             <option value="">-- auswählen --</option>
-            <option>BankAccounts</option>
-            <option>Users</option>
-            <option>Games</option>
-            <option>Categories</option>
-            <option>GameCategory</option>
-            <option>UserBibliothek</option>
-            <option>Comments</option>
-            <option>UserCommentReview</option>
-            <option>Roles</option>
-            <option>Permissions</option>
-            <option>UserRole</option>
-            <option>RolePermission</option>
-            <option>TransactionHistory</option>
+            <option>public_users</option>
+            <option>public_games</option>
+            <option>public_reviews</option>
+            <option>public_users_games</option>
+            <option>public_wishlists</option>
+            <option>public_studios</option>
+            <option>public_publishers_games</option>
+            <option>public_developers_games</option>
+            <option>game_categories</option>
+            <option>game_games_categories</option>
+            <option>game_platforms</option>
+            <option>game_games_platforms</option>
+            <option>hrbac_roles</option>
+            <option>hrbac_permissions</option>
+            <option>hrbac_users_roles</option>
+            <option>hrbac_roles_inherits</option>
+            <option>hrbac_roles_permissions</option>
         </select>
+
         <button id="load">📥 Laden</button>
         <div id="output"></div>
 
         <div id="editor" style="display:none;">
             <h3 id="edit-title">Neuen Datensatz erstellen</h3>
-            <textarea id="json-input" rows="8" cols="80" placeholder='{"Spalte": "Wert"}'></textarea><br><br>
+            <textarea id="json-input" rows="8" cols="80" placeholder='{"spalte": "wert"}'></textarea><br><br>
             <button id="save">💾 Speichern</button>
             <button id="cancel">❌ Abbrechen</button>
         </div>
     </main>
 
     <script>
-        const apiUrl = "../database/api.php";
+        const apiUrl = "/PlayHub/database/api.php";
         const tableSelect = document.getElementById("table");
         const output = document.getElementById("output");
         const editor = document.getElementById("editor");
@@ -130,9 +132,7 @@
         function loadData(table) {
             fetch(`${apiUrl}?table=${table}`)
                 .then(res => res.json())
-                .then(data => {
-                    renderTable(table, data);
-                })
+                .then(data => renderTable(table, data))
                 .catch(err => {
                     output.innerHTML = `<p style="color:red;">Fehler: ${err}</p>`;
                 });
@@ -143,24 +143,19 @@
                 output.innerHTML = `<p>Keine Daten vorhanden oder Fehler.</p>`;
                 return;
             }
-
-            let html = `<button onclick="showEditor()">➕ Neu hinzufügen</button>`;
-            html += `<table><tr>`;
+            let html = `<button onclick="showEditor()">➕ Neu hinzufügen</button><table><tr>`;
             if (data.length > 0) {
                 Object.keys(data[0]).forEach(key => html += `<th>${key}</th>`);
                 html += `<th>Aktionen</th></tr>`;
                 data.forEach(row => {
-                    html += `<tr>`;
-                    Object.values(row).forEach(val => html += `<td>${val ?? ""}</td>`);
-                    const id = row.ID ?? row.Iban ?? row.IBAN ?? "";
-                    html += `<td>
-                <button onclick="editRow('${table}', '${id}')">✏️</button>
-                <button onclick="deleteRow('${table}', '${id}')">🗑️</button>
-            </td></tr>`;
+                    const id = row.id; // PK überall id
+                    html += `<tr>${Object.values(row).map(v => `<td>${v ?? ""}</td>`).join("")}
+                             <td>
+                                <button onclick="editRow('${table}','${id}')">✏️</button>
+                                <button onclick="deleteRow('${table}','${id}')">🗑️</button>
+                             </td></tr>`;
                 });
-            } else {
-                html += `<th>Keine Daten gefunden</th></tr>`;
-            }
+            } else html += `<th>Keine Daten gefunden</th></tr>`;
             html += `</table>`;
             output.innerHTML = html;
         }
@@ -168,15 +163,35 @@
         function showEditor(data = null) {
             editor.style.display = "block";
             editingId = data ? data.id : null;
-            editTitle.textContent = editingId ? `Datensatz bearbeiten (ID: ${editingId})` : "Neuen Datensatz erstellen";
-            jsonInput.value = data ? JSON.stringify(data, null, 4) : "{}";
+
+            editTitle.textContent = editingId ?
+                `Datensatz bearbeiten (ID: ${editingId})` :
+                "Neuen Datensatz erstellen";
+
+            if (!data) {
+                let defaultData = {};
+                if (currentTable === 'public_users') defaultData = {
+                    username: "",
+                    email: "",
+                    password: "",
+                    balance: 0
+                };
+                if (currentTable === 'public_games') defaultData = {
+                    name: "",
+                    description: "",
+                    price: 0
+                };
+                jsonInput.value = JSON.stringify(defaultData, null, 4);
+            } else {
+                jsonInput.value = JSON.stringify(data, null, 4);
+            }
         }
+
 
         function hideEditor() {
             editor.style.display = "none";
             jsonInput.value = "";
         }
-
         document.getElementById("cancel").addEventListener("click", hideEditor);
 
         document.getElementById("save").addEventListener("click", () => {
@@ -187,23 +202,18 @@
                 alert("Ungültiges JSON!");
                 return;
             }
-            if (editingId) {
-                fetch(`${apiUrl}?table=${currentTable}&id=${editingId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(jsonData)
-                }).then(res => res.json()).then(() => loadData(currentTable));
-            } else {
-                fetch(`${apiUrl}?table=${currentTable}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(jsonData)
-                }).then(res => res.json()).then(() => loadData(currentTable));
-            }
+
+            const method = editingId ? "PUT" : "POST";
+            const url = editingId ? `${apiUrl}?table=${currentTable}&id=${editingId}` : `${apiUrl}?table=${currentTable}`;
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(jsonData)
+            }).then(() => loadData(currentTable));
+
             hideEditor();
         });
 
@@ -221,7 +231,6 @@
             fetch(`${apiUrl}?table=${table}&id=${id}`, {
                     method: "DELETE"
                 })
-                .then(res => res.json())
                 .then(() => loadData(table));
         }
     </script>
