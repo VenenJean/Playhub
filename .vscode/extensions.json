@@ -4,6 +4,7 @@
     "bmewburn.vscode-intelephense-client",
     "franneck94.workspace-formatter",
     "redhat.vscode-xml",
-    "inferrinizzard.prettier-sql-vscode"
+    "inferrinizzard.prettier-sql-vscode",
+    "humao.rest-client"
   ]
 }
