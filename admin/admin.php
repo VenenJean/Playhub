@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin | PlayHub</title>
-    <link rel="icon" href="../public/graphics/favicon.svg">
+    <link rel="icon" href="/PlayHub/public/graphics/favicon.svg">
 
-    <link rel="stylesheet" href="../public/styles/playhub.css">
+    <link rel="stylesheet" href="/PlayHub/public/styles/playhub.css">
 </head>
 
 <body>
