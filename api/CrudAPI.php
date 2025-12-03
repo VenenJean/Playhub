@@ -42,7 +42,12 @@ class CrudAPI
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($data);
 
-        return ["id" => $stmt->fetch()["id"]];
+        if ($stmt->columnCount() > 0) {
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ["id" => $result["id"] ?? null];
+        }
+
+        return ["id" => $this->pdo->lastInsertId()];
     }
 
     /** READ ALL */
