@@ -1,6 +1,3 @@
-const table = "<?= $table ?>";
-const api = "<?= $apiUrl ?>";
-
 /* CREATE */
 function createRow() {
   let formData = {};

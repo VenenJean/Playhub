@@ -87,6 +87,10 @@ $table = $_GET["table"] ?? $tables[0];
         <?php endforeach; ?>
     </table>
 
+    <script>
+        const table = "<?= $table ?>";
+        const api = "<?= $apiUrl ?>";
+    </script>
     <script src="script.js"></script>
 </body>
 
