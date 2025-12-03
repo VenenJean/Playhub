@@ -1,3 +1,26 @@
+function openModal(id) {
+  document.getElementById(id).style.display = "block";
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+document.querySelectorAll(".close").forEach((c) => {
+  c.onclick = () => closeModal(c.dataset.close);
+});
+
+window.onclick = function (event) {
+  if (event.target.classList.contains("modal")) {
+    event.target.style.display = "none";
+  }
+};
+
+/* OPEN CREATE MODAL */
+document.getElementById("openCreateModal").onclick = () => {
+  openModal("createModal");
+};
+
 /* CREATE */
 function createRow() {
   let formData = {};
@@ -7,34 +30,31 @@ function createRow() {
 
   fetch(`${api}?table=${table}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formData),
   }).then(() => location.reload());
 }
 
-/* UPDATE */
+/* EDIT */
 function editRow(id) {
   fetch(`${api}?table=${table}&id=${id}`)
     .then((r) => r.json())
     .then((data) => {
-      let html = `<div id='editBox' class='box'>
-                <h3>Edit row #${id}</h3>
-                <form id='editForm'>`;
+      document.getElementById("editTitle").innerText = `Edit row #${id}`;
+      let form = document.getElementById("editForm");
+      form.innerHTML = "";
 
       for (let key in data) {
         if (key === "id") continue;
-        html += `${key}<br><input name='${key}' value='${data[key]}'><br><br>`;
+        form.innerHTML += `
+          <label>${key}</label><br>
+          <input name="${key}" value="${data[key]}" style="width:300px"><br><br>
+        `;
       }
 
-      html += `
-                </form>
-                <button class='btn btn-save' onclick='saveEdit(${id})'>Save</button>
-                <button class='btn' onclick='document.getElementById("editBox").remove()'>Cancel</button>
-            </div>`;
+      document.getElementById("saveEditBtn").onclick = () => saveEdit(id);
 
-      document.body.insertAdjacentHTML("beforeend", html);
+      openModal("editModal");
     });
 }
 
@@ -46,9 +66,7 @@ function saveEdit(id) {
 
   fetch(`${api}?table=${table}&id=${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formData),
   })
     .then((r) => r.json())
@@ -59,9 +77,7 @@ function saveEdit(id) {
 function deleteRow(id) {
   if (!confirm("Really delete?")) return;
 
-  fetch(`${api}?table=${table}&id=${id}`, {
-    method: "DELETE",
-  })
+  fetch(`${api}?table=${table}&id=${id}`, { method: "DELETE" })
     .then((r) => r.json())
-    .then(() => document.querySelector("#row-" + id).remove());
+    .then(() => document.getElementById("row-" + id).remove());
 }

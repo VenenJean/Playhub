@@ -52,20 +52,40 @@ $table = $_GET["table"] ?? $tables[0];
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     ?>
 
-    <!-- CREATE NEW RECORD -->
-    <div class="box">
-        <h3>Create new row</h3>
-        <form id="createForm">
-            <?php foreach ($columns as $col): ?>
-                <?php if ($col === "id") continue; ?>
-                <label><?= $col ?></label><br>
-                <input type="text" name="<?= $col ?>" style="width: 300px"><br><br>
-            <?php endforeach; ?>
-            <button type="button" class="btn btn-save" onclick="createRow()">Create</button>
-        </form>
+    <!-- CREATE BUTTON -->
+    <button class="btn btn-save" id="openCreateModal">+ Create new</button>
+
+    <!-- CREATE MODAL -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-close="createModal">&times;</span>
+            <h3>Create new row</h3>
+
+            <form id="createForm">
+                <?php foreach ($columns as $col): ?>
+                    <?php if ($col === "id") continue; ?>
+                    <label><?= $col ?></label><br>
+                    <input type="text" name="<?= $col ?>" style="width: 300px"><br><br>
+                <?php endforeach; ?>
+            </form>
+
+            <button class="btn btn-save" onclick="createRow()">Create</button>
+        </div>
     </div>
 
-    <!-- TABLE DATA DISPLAY -->
+    <!-- EDIT MODAL -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-close="editModal">&times;</span>
+            <h3 id="editTitle">Edit</h3>
+
+            <form id="editForm"></form>
+
+            <button class="btn btn-save" id="saveEditBtn">Save</button>
+        </div>
+    </div>
+
+    <!-- TABLE DATA -->
     <table>
         <tr>
             <?php foreach ($columns as $col): ?>
@@ -92,6 +112,7 @@ $table = $_GET["table"] ?? $tables[0];
         const api = "<?= $apiUrl ?>";
     </script>
     <script src="script.js"></script>
+
 </body>
 
 </html>
