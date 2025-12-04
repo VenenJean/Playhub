@@ -10,18 +10,19 @@ document.querySelectorAll(".close").forEach((c) => {
   c.onclick = () => closeModal(c.dataset.close);
 });
 
+/* Open Create Modal */
+document.getElementById("openCreateModal").onclick = () => {
+  openModal("createModal");
+};
+
+// Close modal when clicking outside of it
 window.onclick = function (event) {
   if (event.target.classList.contains("modal")) {
     event.target.style.display = "none";
   }
 };
 
-/* OPEN CREATE MODAL */
-document.getElementById("openCreateModal").onclick = () => {
-  openModal("createModal");
-};
-
-/* CREATE */
+/* Create */
 function createRow() {
   let formData = {};
   new FormData(document.querySelector("#createForm")).forEach(
@@ -35,7 +36,7 @@ function createRow() {
   }).then(() => location.reload());
 }
 
-/* EDIT */
+/* Edit */
 function editRow(id) {
   fetch(`${api}?table=${table}&id=${id}`)
     .then((r) => r.json())
@@ -58,6 +59,7 @@ function editRow(id) {
     });
 }
 
+/* Save Edit */
 function saveEdit(id) {
   let formData = {};
   new FormData(document.querySelector("#editForm")).forEach(
@@ -73,7 +75,7 @@ function saveEdit(id) {
     .then(() => location.reload());
 }
 
-/* DELETE */
+/* Delete */
 function deleteRow(id) {
   if (!confirm("Really delete?")) return;
 
