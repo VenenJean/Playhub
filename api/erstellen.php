@@ -1,8 +1,8 @@
 <?php
 // *** KONFIG ***
-$dbHost = '(localdb)\\MSSQLLocalDB';
-$dbUser = 'php_user';
-$dbPass = 'StrongPassword123!';
+$dbHost = '10.20.20.9';
+$dbUser = 'g4_6it23';
+$dbPass = '8911,LKm,Rr';
 
 $error = '';
 $message = '';
