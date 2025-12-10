@@ -1,8 +1,7 @@
 <?php
-// *** KONFIG ***
-$dbHost = '10.20.20.9';
-$dbUser = 'g4_6it23';
-$dbPass = '8911,LKm,Rr';
+// Load configuration and helper classes
+$config = require __DIR__ . '/config.php';
+require_once __DIR__ . '/Database.php';
 
 $error = '';
 $message = '';
@@ -13,10 +12,11 @@ $selectedDb = $_POST['database'] ?? '';
 // Datenbanken laden
 // -------------------------------------------------
 try {
+    // connect to the master database using credentials from config
     $pdoMaster = new PDO(
-        "sqlsrv:Server=$dbHost;Database=master",
-        $dbUser,
-        $dbPass,
+        "sqlsrv:Server={$config['db_host']};Database=master",
+        $config['db_name'],
+        $config['db_pass'],
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::SQLSRV_ATTR_ENCODING => PDO::SQLSRV_ENCODING_UTF8
@@ -308,15 +308,9 @@ SQL,
 // -------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
     try {
-        $pdo = new PDO(
-            "sqlsrv:Server=$dbHost;Database=$selectedDb",
-            $dbUser,
-            $dbPass,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::SQLSRV_ATTR_ENCODING => PDO::SQLSRV_ENCODING_UTF8
-            ]
-        );
+        // Use Database class to create a PDO bound to the selected database
+        $database = new Database($selectedDb);
+        $pdo = $database->pdo();
 
         $pdo->beginTransaction();
 
@@ -337,7 +331,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
         $pdo->commit();
         $message = "Setup erfolgreich ausgeführt auf Datenbank '$selectedDb'.";
     } catch (PDOException $e) {
-        if ($pdo->inTransaction()) {
+        // only attempt rollback if $pdo exists and we're in a transaction
+        if (isset($pdo) && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
         $error = "Fehler: " . $e->getMessage();
