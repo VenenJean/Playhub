@@ -41,22 +41,84 @@ function editRow(id) {
   fetch(`${api}?table=${table}&id=${id}`)
     .then((r) => r.json())
     .then((data) => {
-      document.getElementById("editTitle").innerText = `Edit row #${id}`;
-      let form = document.getElementById("editForm");
-      form.innerHTML = "";
+      const form = document.querySelector("#editForm");
+      form.innerHTML = ""; // Reset
 
-      for (let key in data) {
-        if (key === "id") continue;
-        form.innerHTML += `
-          <label>${key}</label><br>
-          <input name="${key}" value="${data[key]}" style="width:300px"><br><br>
-        `;
-      }
+      columns.forEach((col) => {
+        if (col === "id") return;
 
-      document.getElementById("saveEditBtn").onclick = () => saveEdit(id);
+        let label = col.replace("_id", "");
+        form.innerHTML += `<label><b>${label}</b></label><br>`;
 
-      openModal("editModal");
+        // FK Dropdown
+        if (fkMap[col]) {
+          fetch(`${api}?table=${fkMap[col].table}`)
+            .then((r) => r.json())
+            .then((items) => {
+              let html = `<select name="${col}" style="width:300px">`;
+              items.forEach((it) => {
+                html += `<option value="${it.id}" ${
+                  it.id == data[col] ? "selected" : ""
+                }>${it[fkMap[col].label]}</option>`;
+              });
+              html += "</select><br><br>";
+
+              form.insertAdjacentHTML("beforeend", html);
+            });
+        }
+
+        // Normales Textfeld
+        else {
+          form.innerHTML += `<input type="text" name="${col}" value="${
+            data[col] ?? ""
+          }" style="width:300px;"><br><br>`;
+        }
+      });
+
+      // Modal öffnen
+      document.querySelector("#editModal").style.display = "block";
+      document.querySelector("#editTitle").innerHTML = "Edit row #" + id;
+
+      // Save Button übernimmt deine vorhandene Funktion!
+      document.querySelector("#saveEditBtn").onclick = () => saveEdit(id);
     });
+}
+
+function mapHasKey(column) {
+  return Object.keys(mapFK).includes(column);
+}
+
+const mapFK = {
+  game_id: { table: "public_games", column: "name" },
+  category_id: { table: "game_categories", column: "name" },
+  platform_id: { table: "game_platforms", column: "name" },
+  user_id: { table: "public_users", column: "username" },
+  studio_id: { table: "public_studios", column: "name" },
+  role_id: { table: "hrbac_roles", column: "name" },
+  permission_id: { table: "hrbac_permissions", column: "name" },
+  parent_role_id: { table: "hrbac_roles", column: "name" },
+  child_role_id: { table: "hrbac_roles", column: "name" },
+};
+
+function loadFK(column, selected) {
+  if (!mapFK[column]) return;
+
+  fetch(`${api}?table=${mapFK[column].table}`)
+    .then((r) => r.json())
+    .then((data) => {
+      let select = document.querySelector(`select[name="${column}"]`);
+      data.forEach((e) => {
+        let o = document.createElement("option");
+        o.value = e.id;
+        o.text = e[mapFK[column].column];
+        if (e.id == selected) o.selected = true;
+        select.appendChild(o);
+      });
+    });
+}
+
+function mapHasKey(column) {
+  return mapFK[column] !== undefined;
 }
 
 /* Save Edit */

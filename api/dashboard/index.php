@@ -64,13 +64,39 @@ $table = $_GET["table"] ?? $tables[0];
             <span class="close" data-close="createModal">&times;</span>
             <h3>Create new row</h3>
 
+            <?php
+            $fkMap = [
+                'game_id'      => ['table' => 'public_games', 'label' => 'name'],
+                'category_id'  => ['table' => 'game_categories', 'label' => 'name'],
+                'platform_id'  => ['table' => 'game_platforms', 'label' => 'name'],
+                'user_id'      => ['table' => 'public_users', 'label' => 'username'],
+                'studio_id'    => ['table' => 'public_studios', 'label' => 'name'],
+                'role_id'      => ['table' => 'hrbac_roles', 'label' => 'name'],
+                'permission_id' => ['table' => 'hrbac_permissions', 'label' => 'name']
+            ];
+            ?>
+
             <form id="createForm">
                 <?php foreach ($columns as $col): ?>
                     <?php if ($col === "id") continue; ?>
-                    <label><?= $col ?></label><br>
-                    <input type="text" name="<?= $col ?>" style="width: 300px"><br><br>
+                    <label><b><?= ucfirst(str_replace('_id', '', $col)) ?></b></label><br>
+
+                    <?php if (isset($fkMap[$col])): ?>
+                        <select name="<?= $col ?>" style="width:300px;">
+                            <?php
+                            $ref = $fkMap[$col];
+                            $items = $pdo->query("SELECT id, {$ref['label']} AS text FROM {$ref['table']} ORDER BY text")->fetchAll(PDO::FETCH_ASSOC);
+                            foreach ($items as $item) {
+                                echo "<option value='{$item['id']}'>{$item['text']}</option>";
+                            }
+                            ?>
+                        </select><br><br>
+                    <?php else: ?>
+                        <input type="text" name="<?= $col ?>" style="width:300px"><br><br>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </form>
+
 
             <button class="btn btn-save" onclick="createRow()">Create</button>
         </div>
@@ -88,12 +114,34 @@ $table = $_GET["table"] ?? $tables[0];
         </div>
     </div>
 
+    <script>
+        const fkMap = <?= json_encode($fkMap) ?>;
+        const columns = <?= json_encode($columns) ?>;
+    </script>
+
+    <?php
+    // FK Mapping Regeln dynamisch
+    $fkLookup = [
+        'game_id'      => ['table' => 'public_games', 'column' => 'name'],
+        'category_id'  => ['table' => 'game_categories', 'column' => 'name'],
+        'platform_id'  => ['table' => 'game_platforms', 'column' => 'name'],
+        'user_id'      => ['table' => 'public_users', 'column' => 'username'],
+        'studio_id'    => ['table' => 'public_studios', 'column' => 'name'],
+        'role_id'      => ['table' => 'hrbac_roles', 'column' => 'name'],
+        'permission_id' => ['table' => 'hrbac_permissions', 'column' => 'name'],
+        'parent_role_id' => ['table' => 'hrbac_roles', 'column' => 'name'],
+        'child_role_id' => ['table' => 'hrbac_roles', 'column' => 'name'],
+        'game_id'      => ['table' => 'public_games', 'column' => 'name'],
+    ];
+    ?>
     <!-- Table Data -->
     <table>
         <tr>
             <!-- Generates all columns dynamically -->
-            <?php foreach ($columns as $col): ?>
-                <th><?= $col ?></th>
+            <?php foreach ($columns as $col):
+                $label = str_replace('_id', '', $col); // game_id -> game
+            ?>
+                <th><?= ucfirst($label) ?></th>
             <?php endforeach; ?>
             <th>Actions</th>
         </tr>
@@ -102,7 +150,19 @@ $table = $_GET["table"] ?? $tables[0];
         <?php foreach ($rows as $row): ?>
             <tr id="row-<?= $row["id"] ?>">
                 <?php foreach ($columns as $col): ?>
-                    <td><?= htmlspecialchars($row[$col]) ?></td> <!-- Convert special characters into HTML entities e.g. & to &amp; -->
+                    <td>
+                        <?php
+                        if (isset($fkLookup[$col])) {
+                            $ref = $fkLookup[$col];
+                            $q = $pdo->prepare("SELECT {$ref['column']} FROM {$ref['table']} WHERE id=?");
+                            $q->execute([$row[$col]]);
+                            echo $q->fetchColumn() ?? "Unknown";
+                        } else {
+                            echo htmlspecialchars($row[$col]);
+                        }
+                        ?>
+                    </td>
+                    <!-- Convert special characters into HTML entities e.g. & to &amp; -->
                 <?php endforeach; ?>
                 <td>
                     <button class="btn btn-edit" onclick="editRow(<?= $row['id'] ?>)">Edit</button>
