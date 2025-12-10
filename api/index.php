@@ -1,17 +1,15 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type");
-
+// Require necessary files
 require "Database.php";
 require "CrudAPI.php";
 
 $pdo = (new Database())->pdo();
 
+// Reading query parameters
 $table = $_GET["table"] ?? null;
 $id    = $_GET["id"] ?? null;
 
+// Validate table parameter
 if (!$table) {
     http_response_code(400);
     echo json_encode(["error" => "Missing table name"]);
@@ -19,8 +17,9 @@ if (!$table) {
 }
 
 $api = new CrudAPI($pdo, $table);
-$method = $_SERVER["REQUEST_METHOD"];
+$method = $_SERVER["REQUEST_METHOD"]; // Get request method e.g. GET POST PUT DELETE
 
+// Handle requests based on HTTP method
 switch ($method) {
 
     case "GET":
@@ -28,7 +27,7 @@ switch ($method) {
         break;
 
     case "POST":
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = json_decode(file_get_contents("php://input"), true); // As associative array
         echo json_encode($api->create($data));
         break;
 
@@ -38,7 +37,7 @@ switch ($method) {
             echo json_encode(["error" => "Missing id"]);
             break;
         }
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = json_decode(file_get_contents("php://input"), true);  // As associative array
         echo json_encode($api->update($id, $data));
         break;
 
