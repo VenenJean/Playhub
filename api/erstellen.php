@@ -15,7 +15,7 @@ try {
     // connect to the master database using credentials from config
     $pdoMaster = new PDO(
         "sqlsrv:Server={$config['db_host']};Database=master",
-        $config['db_name'],
+        $config['db_user'],
         $config['db_pass'],
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
