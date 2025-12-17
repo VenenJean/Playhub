@@ -33,10 +33,9 @@ try {
     $error = "Fehler: " . $e->getMessage();
 }
 
-// -------------------------------------------------
 // Hilfsfunktion: Tabelle prüfen
-// -------------------------------------------------
-function tableExists(PDO $pdo, string $table): bool {
+function tableExists(PDO $pdo, string $table): bool
+{
     $stmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM sys.tables 
@@ -46,10 +45,9 @@ function tableExists(PDO $pdo, string $table): bool {
     return $stmt->fetchColumn() > 0;
 }
 
-// -------------------------------------------------
 // Hilfsfunktion: Tabelle leer?
-// -------------------------------------------------
-function tableIsEmpty(PDO $pdo, string $table): bool {
+function tableIsEmpty(PDO $pdo, string $table): bool
+{
     try {
         $stmt = $pdo->query("SELECT TOP 1 1 FROM $table");
         return $stmt->fetch() === false;
@@ -58,9 +56,7 @@ function tableIsEmpty(PDO $pdo, string $table): bool {
     }
 }
 
-// -------------------------------------------------
 // Tabellendefinitionen
-// -------------------------------------------------
 $tables = [
     "public_users" => <<<SQL
 CREATE TABLE public_users (
@@ -216,9 +212,7 @@ CREATE TABLE hrbac_roles_permissions (
 SQL,
 ];
 
-// -------------------------------------------------
 // Seeds – vorher Tabelleninhalt prüfen!
-// -------------------------------------------------
 $seeds = [
     "public_users" => <<<SQL
 INSERT INTO public_users (username,email,password,balance) VALUES
@@ -303,9 +297,7 @@ INSERT INTO hrbac_roles_inherits (parent_role_id,child_role_id) VALUES
 SQL,
 ];
 
-// -------------------------------------------------
 // Button geklickt?
-// -------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
     try {
         // Use Database class to create a PDO bound to the selected database
@@ -341,53 +333,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
 ?>
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>Playhub HRBAC Setup</title>
     <style>
         body {
-            background:#111; color:#eee; font-family:sans-serif;
-            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background: #111;
+            color: #eee;
+            font-family: sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .card {
-            background:#222; padding:2rem; border-radius:12px; width:350px;
+            background: #222;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 350px;
         }
-        select, button {
-            width:100%; padding:10px; margin-top:10px;
-            border-radius:8px; border:none; font-size:1rem;
+
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
         }
-        button { background:#4caf50; color:#fff; cursor:pointer; }
-        button:hover { background:#43a047; }
-        .msg { padding:10px; border-radius:6px; margin-top:1rem; }
-        .ok { background:#2a9d8f; }
-        .err { background:#9b2226; }
+
+        button {
+            background: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #43a047;
+        }
+
+        .msg {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .ok {
+            background: #2a9d8f;
+        }
+
+        .err {
+            background: #9b2226;
+        }
     </style>
 </head>
+
 <body>
-<div class="card">
-    <h2>Playhub HRBAC Setup</h2>
+    <div class="card">
+        <h2>Playhub HRBAC Setup</h2>
 
-    <?php if ($error): ?>
-    <div class="msg err"><?= $error ?></div>
-    <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="msg err"><?= $error ?></div>
+        <?php endif; ?>
 
-    <?php if ($message): ?>
-    <div class="msg ok"><?= $message ?></div>
-    <?php endif; ?>
+        <?php if ($message): ?>
+            <div class="msg ok"><?= $message ?></div>
+        <?php endif; ?>
 
-    <form method="post">
-        <label>Datenbank wählen:</label>
-        <select name="database" required>
-            <option value="">-- wählen --</option>
-            <?php foreach ($databases as $db): ?>
-                <option value="<?= $db ?>" <?= ($db === $selectedDb ? 'selected' : '') ?>>
-                    <?= $db ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <form method="post">
+            <label>Datenbank wählen:</label>
+            <select name="database" required>
+                <option value="">-- wählen --</option>
+                <?php foreach ($databases as $db): ?>
+                    <option value="<?= $db ?>" <?= ($db === $selectedDb ? 'selected' : '') ?>>
+                        <?= $db ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <button type="submit">Setup ausführen</button>
-    </form>
-</div>
+            <button type="submit">Setup ausführen</button>
+        </form>
+    </div>
 </body>
+
 </html>
