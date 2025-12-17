@@ -1,15 +1,5 @@
 <?php
-require "../Database.php";
-
-$pdo = (new Database())->pdo();
-$apiUrl = "../index.php";
-
-// Get list of all tables in the database
-$tables = $pdo->query("
-    SELECT TABLE_NAME 
-    FROM INFORMATION_SCHEMA.TABLES 
-    WHERE TABLE_TYPE = 'BASE TABLE'
-")->fetchAll(PDO::FETCH_COLUMN);
+include "./globals.php";
 
 // Get query parameter table or default to first table
 $table = $_GET["table"] ?? $tables[0];
@@ -58,22 +48,6 @@ $table = $_GET["table"] ?? $tables[0];
         const fkMap = <?= json_encode($fkMap) ?>;
         const columns = <?= json_encode($columns) ?>;
     </script>
-
-    <?php
-    // FK Mapping Regeln dynamisch
-    $fkLookup = [
-        'game_id'      => ['table' => 'public_games', 'column' => 'name'],
-        'category_id'  => ['table' => 'game_categories', 'column' => 'name'],
-        'platform_id'  => ['table' => 'game_platforms', 'column' => 'name'],
-        'user_id'      => ['table' => 'public_users', 'column' => 'username'],
-        'studio_id'    => ['table' => 'public_studios', 'column' => 'name'],
-        'role_id'      => ['table' => 'hrbac_roles', 'column' => 'name'],
-        'permission_id' => ['table' => 'hrbac_permissions', 'column' => 'name'],
-        'parent_role_id' => ['table' => 'hrbac_roles', 'column' => 'name'],
-        'child_role_id' => ['table' => 'hrbac_roles', 'column' => 'name'],
-        'game_id'      => ['table' => 'public_games', 'column' => 'name'],
-    ];
-    ?>
 
     <?php include "./components/dataTable.php"; ?>
 
