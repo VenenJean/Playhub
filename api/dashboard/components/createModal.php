@@ -4,18 +4,6 @@
         <span class="close" data-close="createModal">&times;</span>
         <h3>Create new row</h3>
 
-        <?php
-        $fkMap = [
-            'game_id'      => ['table' => 'public_games', 'label' => 'name'],
-            'category_id'  => ['table' => 'game_categories', 'label' => 'name'],
-            'platform_id'  => ['table' => 'game_platforms', 'label' => 'name'],
-            'user_id'      => ['table' => 'public_users', 'label' => 'username'],
-            'studio_id'    => ['table' => 'public_studios', 'label' => 'name'],
-            'role_id'      => ['table' => 'hrbac_roles', 'label' => 'name'],
-            'permission_id' => ['table' => 'hrbac_permissions', 'label' => 'name'],
-        ];
-        ?>
-
         <form id="createForm">
             <?php foreach ($columns as $col): ?>
                 <?php if ($col === "id") continue; ?>
