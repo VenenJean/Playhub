@@ -12,10 +12,9 @@
                 <?php if (isset($fkMap[$col])): ?>
                     <select name="<?= $col ?>" style="width:300px;">
                         <?php
-                        $ref = $fkMap[$col];
-                        $items = $pdo->query("SELECT id, {$ref['label']} AS text FROM {$ref['table']} ORDER BY text")->fetchAll(PDO::FETCH_ASSOC);
+                        $items = getFkOptions($col);
                         foreach ($items as $item) {
-                            echo "<option value='{$item['id']}'>{$item['text']}</option>";
+                            echo "<option value='" . htmlspecialchars($item['id']) . "'>" . htmlspecialchars($item['text']) . "</option>";
                         }
                         ?>
                     </select><br><br>
