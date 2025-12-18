@@ -33,10 +33,9 @@ try {
     $error = "Fehler: " . $e->getMessage();
 }
 
-// -------------------------------------------------
 // Hilfsfunktion: Tabelle prüfen
-// -------------------------------------------------
-function tableExists(PDO $pdo, string $table): bool {
+function tableExists(PDO $pdo, string $table): bool
+{
     $stmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM sys.tables 
@@ -46,10 +45,9 @@ function tableExists(PDO $pdo, string $table): bool {
     return $stmt->fetchColumn() > 0;
 }
 
-// -------------------------------------------------
 // Hilfsfunktion: Tabelle leer?
-// -------------------------------------------------
-function tableIsEmpty(PDO $pdo, string $table): bool {
+function tableIsEmpty(PDO $pdo, string $table): bool
+{
     try {
         $stmt = $pdo->query("SELECT TOP 1 1 FROM $table");
         return $stmt->fetch() === false;
@@ -58,9 +56,7 @@ function tableIsEmpty(PDO $pdo, string $table): bool {
     }
 }
 
-// -------------------------------------------------
 // Tabellendefinitionen
-// -------------------------------------------------
 $tables = [
     "public_users" => <<<SQL
 CREATE TABLE public_users (
@@ -89,8 +85,11 @@ CREATE TABLE public_reviews (
     review_datetime DATETIME,
     stars INT,
     content NVARCHAR(MAX),
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_users_games" => <<<SQL
@@ -99,8 +98,11 @@ CREATE TABLE public_users_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     buy_datetime DATETIME,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_wishlists" => <<<SQL
@@ -109,8 +111,11 @@ CREATE TABLE public_wishlists (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     added_datetime DATETIME,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_studios" => <<<SQL
@@ -119,7 +124,8 @@ CREATE TABLE public_studios (
     name NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX),
     user_id INT,
-    FOREIGN KEY (user_id) REFERENCES public_users(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 );
 SQL,
     "public_publishers_games" => <<<SQL
@@ -128,9 +134,13 @@ CREATE TABLE public_publishers_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     studio_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_developers_games" => <<<SQL
@@ -139,9 +149,13 @@ CREATE TABLE public_developers_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     studio_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "game_categories" => <<<SQL
@@ -155,8 +169,11 @@ CREATE TABLE game_games_categories (
     id INT PRIMARY KEY IDENTITY (1,1),
     game_id INT NOT NULL,
     category_id INT NOT NULL,
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (category_id) REFERENCES game_categories(id)
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (category_id) REFERENCES game_categories(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "game_platforms" => <<<SQL
@@ -170,8 +187,11 @@ CREATE TABLE game_games_platforms (
     id INT PRIMARY KEY IDENTITY (1,1),
     game_id INT NOT NULL,
     platform_id INT NOT NULL,
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (platform_id) REFERENCES game_platforms(id)
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (platform_id) REFERENCES game_platforms(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles" => <<<SQL
@@ -192,8 +212,12 @@ CREATE TABLE hrbac_users_roles (
     id INT PRIMARY KEY IDENTITY (1,1),
     user_id INT NOT NULL,
     role_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+-- hrbac_users_roles
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles_inherits" => <<<SQL
@@ -201,8 +225,12 @@ CREATE TABLE hrbac_roles_inherits (
     id INT PRIMARY KEY IDENTITY (1,1),
     parent_role_id INT NOT NULL,
     child_role_id INT NOT NULL,
-    FOREIGN KEY (parent_role_id) REFERENCES hrbac_roles(id),
-    FOREIGN KEY (child_role_id) REFERENCES hrbac_roles(id)
+-- hrbac_roles_inherits
+FOREIGN KEY (parent_role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (child_role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles_permissions" => <<<SQL
@@ -210,15 +238,17 @@ CREATE TABLE hrbac_roles_permissions (
     id INT PRIMARY KEY IDENTITY (1,1),
     role_id INT NOT NULL,
     permission_id INT NOT NULL,
-    FOREIGN KEY (role_id) REFERENCES hrbac_roles(id),
-    FOREIGN KEY (permission_id) REFERENCES hrbac_permissions(id)
+-- hrbac_roles_permissions
+FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (permission_id) REFERENCES hrbac_permissions(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
 ];
 
-// -------------------------------------------------
 // Seeds – vorher Tabelleninhalt prüfen!
-// -------------------------------------------------
 $seeds = [
     "public_users" => <<<SQL
 INSERT INTO public_users (username,email,password,balance) VALUES
@@ -303,9 +333,7 @@ INSERT INTO hrbac_roles_inherits (parent_role_id,child_role_id) VALUES
 SQL,
 ];
 
-// -------------------------------------------------
 // Button geklickt?
-// -------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
     try {
         // Use Database class to create a PDO bound to the selected database
@@ -341,53 +369,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
 ?>
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>Playhub HRBAC Setup</title>
     <style>
         body {
-            background:#111; color:#eee; font-family:sans-serif;
-            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background: #111;
+            color: #eee;
+            font-family: sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .card {
-            background:#222; padding:2rem; border-radius:12px; width:350px;
+            background: #222;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 350px;
         }
-        select, button {
-            width:100%; padding:10px; margin-top:10px;
-            border-radius:8px; border:none; font-size:1rem;
+
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
         }
-        button { background:#4caf50; color:#fff; cursor:pointer; }
-        button:hover { background:#43a047; }
-        .msg { padding:10px; border-radius:6px; margin-top:1rem; }
-        .ok { background:#2a9d8f; }
-        .err { background:#9b2226; }
+
+        button {
+            background: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #43a047;
+        }
+
+        .msg {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .ok {
+            background: #2a9d8f;
+        }
+
+        .err {
+            background: #9b2226;
+        }
     </style>
 </head>
+
 <body>
-<div class="card">
-    <h2>Playhub HRBAC Setup</h2>
+    <div class="card">
+        <h2>Playhub HRBAC Setup</h2>
 
-    <?php if ($error): ?>
-    <div class="msg err"><?= $error ?></div>
-    <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="msg err"><?= $error ?></div>
+        <?php endif; ?>
 
-    <?php if ($message): ?>
-    <div class="msg ok"><?= $message ?></div>
-    <?php endif; ?>
+        <?php if ($message): ?>
+            <div class="msg ok"><?= $message ?></div>
+        <?php endif; ?>
 
-    <form method="post">
-        <label>Datenbank wählen:</label>
-        <select name="database" required>
-            <option value="">-- wählen --</option>
-            <?php foreach ($databases as $db): ?>
-                <option value="<?= $db ?>" <?= ($db === $selectedDb ? 'selected' : '') ?>>
-                    <?= $db ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <form method="post">
+            <label>Datenbank wählen:</label>
+            <select name="database" required>
+                <option value="">-- wählen --</option>
+                <?php foreach ($databases as $db): ?>
+                    <option value="<?= $db ?>" <?= ($db === $selectedDb ? 'selected' : '') ?>>
+                        <?= $db ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <button type="submit">Setup ausführen</button>
-    </form>
-</div>
+            <button type="submit">Setup ausführen</button>
+        </form>
+    </div>
 </body>
+
 </html>
