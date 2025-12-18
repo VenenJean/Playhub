@@ -85,8 +85,11 @@ CREATE TABLE public_reviews (
     review_datetime DATETIME,
     stars INT,
     content NVARCHAR(MAX),
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_users_games" => <<<SQL
@@ -95,8 +98,11 @@ CREATE TABLE public_users_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     buy_datetime DATETIME,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_wishlists" => <<<SQL
@@ -105,8 +111,11 @@ CREATE TABLE public_wishlists (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     added_datetime DATETIME,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_studios" => <<<SQL
@@ -115,7 +124,8 @@ CREATE TABLE public_studios (
     name NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX),
     user_id INT,
-    FOREIGN KEY (user_id) REFERENCES public_users(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 );
 SQL,
     "public_publishers_games" => <<<SQL
@@ -124,9 +134,13 @@ CREATE TABLE public_publishers_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     studio_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "public_developers_games" => <<<SQL
@@ -135,9 +149,13 @@ CREATE TABLE public_developers_games (
     user_id INT NOT NULL,
     game_id INT NOT NULL,
     studio_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (studio_id) REFERENCES public_studios(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "game_categories" => <<<SQL
@@ -151,8 +169,11 @@ CREATE TABLE game_games_categories (
     id INT PRIMARY KEY IDENTITY (1,1),
     game_id INT NOT NULL,
     category_id INT NOT NULL,
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (category_id) REFERENCES game_categories(id)
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (category_id) REFERENCES game_categories(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "game_platforms" => <<<SQL
@@ -166,8 +187,11 @@ CREATE TABLE game_games_platforms (
     id INT PRIMARY KEY IDENTITY (1,1),
     game_id INT NOT NULL,
     platform_id INT NOT NULL,
-    FOREIGN KEY (game_id) REFERENCES public_games(id),
-    FOREIGN KEY (platform_id) REFERENCES game_platforms(id)
+FOREIGN KEY (game_id) REFERENCES public_games(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (platform_id) REFERENCES game_platforms(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles" => <<<SQL
@@ -188,8 +212,12 @@ CREATE TABLE hrbac_users_roles (
     id INT PRIMARY KEY IDENTITY (1,1),
     user_id INT NOT NULL,
     role_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES public_users(id),
-    FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+-- hrbac_users_roles
+FOREIGN KEY (user_id) REFERENCES public_users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles_inherits" => <<<SQL
@@ -197,8 +225,12 @@ CREATE TABLE hrbac_roles_inherits (
     id INT PRIMARY KEY IDENTITY (1,1),
     parent_role_id INT NOT NULL,
     child_role_id INT NOT NULL,
-    FOREIGN KEY (parent_role_id) REFERENCES hrbac_roles(id),
-    FOREIGN KEY (child_role_id) REFERENCES hrbac_roles(id)
+-- hrbac_roles_inherits
+FOREIGN KEY (parent_role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (child_role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
     "hrbac_roles_permissions" => <<<SQL
@@ -206,8 +238,12 @@ CREATE TABLE hrbac_roles_permissions (
     id INT PRIMARY KEY IDENTITY (1,1),
     role_id INT NOT NULL,
     permission_id INT NOT NULL,
-    FOREIGN KEY (role_id) REFERENCES hrbac_roles(id),
-    FOREIGN KEY (permission_id) REFERENCES hrbac_permissions(id)
+-- hrbac_roles_permissions
+FOREIGN KEY (role_id) REFERENCES hrbac_roles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (permission_id) REFERENCES hrbac_permissions(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 SQL,
 ];
