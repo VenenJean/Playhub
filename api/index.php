@@ -3,6 +3,8 @@
 require "Database.php";
 require "CrudAPI.php";
 
+header('Content-Type: application/json');  // Ensure proper JSON response
+
 $pdo = (new Database())->pdo();
 
 // Reading query parameters
@@ -20,37 +22,42 @@ $api = new CrudAPI($pdo, $table);
 $method = $_SERVER["REQUEST_METHOD"]; // Get request method e.g. GET POST PUT DELETE
 
 // Handle requests based on HTTP method
-switch ($method) {
+try {
+    switch ($method) {
 
-    case "GET":
-        echo json_encode($id ? $api->read($id) : $api->readAll());
-        break;
-
-    case "POST":
-        $data = json_decode(file_get_contents("php://input"), true); // As associative array
-        echo json_encode($api->create($data));
-        break;
-
-    case "PUT":
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(["error" => "Missing id"]);
+        case "GET":
+            echo json_encode($id ? $api->read($id) : $api->readAll());
             break;
-        }
-        $data = json_decode(file_get_contents("php://input"), true);  // As associative array
-        echo json_encode($api->update($id, $data));
-        break;
 
-    case "DELETE":
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(["error" => "Missing id"]);
+        case "POST":
+            $data = json_decode(file_get_contents("php://input"), true); // As associative array
+            echo json_encode($api->create($data));
             break;
-        }
-        echo json_encode($api->delete($id));
-        break;
 
-    default:
-        http_response_code(405);
-        echo json_encode(["error" => "Method not allowed"]);
+        case "PUT":
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(["error" => "Missing id"]);
+                break;
+            }
+            $data = json_decode(file_get_contents("php://input"), true);  // As associative array
+            echo json_encode($api->update($id, $data));
+            break;
+
+        case "DELETE":
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(["error" => "Missing id"]);
+                break;
+            }
+            echo json_encode($api->delete($id));
+            break;
+
+        default:
+            http_response_code(405);
+            echo json_encode(["error" => "Method not allowed"]);
+    }
+} catch (Exception $e) {
+    http_response_code(500); // Internal Server Error
+    echo json_encode(["error" => $e->getMessage()]);
 }
