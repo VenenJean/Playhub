@@ -18,7 +18,14 @@ if (!$table) {
     exit;
 }
 
-$api = new CrudAPI($pdo, $table);
+$context = [
+    // If you later add authentication/session, you can set this to a username/user_id.
+    'actor'      => $_SERVER['PHP_AUTH_USER'] ?? ($_SERVER['REMOTE_USER'] ?? null),
+    'ip'         => $_SERVER['REMOTE_ADDR'] ?? null,
+    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+];
+
+$api = new CrudAPI($pdo, $table, $context);
 $method = $_SERVER["REQUEST_METHOD"]; // Get request method e.g. GET POST PUT DELETE
 
 // Handle requests based on HTTP method
