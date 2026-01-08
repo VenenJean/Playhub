@@ -17,7 +17,10 @@ $table = $_GET["table"] ?? $tables[0];
 </head>
 
 <body>
-    <h1>📊 API Dashboard</h1>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <h1 style="margin:0;">📊 API Dashboard</h1>
+        <a class="btn" href="logs.php">🧾 View Logs</a>
+    </div>
 
     <?php include "./components/tableDropDown.php"; ?>
 
