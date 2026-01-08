@@ -349,12 +349,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedDb && empty($error)) {
             }
         }
 
+        // -------------------------------------------------
+        // FOREIGN KEY CASCADE FIX (nachträglich erzwingen)
+        // -------------------------------------------------
+        $cascadeSql = <<<SQL
+
+-- public_wishlists.user_id
+IF EXISTS (
+    SELECT 1 FROM sys.foreign_keys 
+    WHERE name = 'FK__public_wi__user___00200768'
+)
+ALTER TABLE public_wishlists
+DROP CONSTRAINT FK__public_wi__user___00200768;
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.foreign_keys 
+    WHERE name = 'FK_public_wishlists_user'
+)
+ALTER TABLE public_wishlists
+ADD CONSTRAINT FK_public_wishlists_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- public_reviews.user_id
+DECLARE @fk_reviews NVARCHAR(255);
+SELECT @fk_reviews = name
+FROM sys.foreign_keys
+WHERE parent_object_id = OBJECT_ID('public_reviews')
+AND referenced_object_id = OBJECT_ID('public_users');
+
+IF @fk_reviews IS NOT NULL
+    EXEC('ALTER TABLE public_reviews DROP CONSTRAINT ' + @fk_reviews);
+
+ALTER TABLE public_reviews
+ADD CONSTRAINT FK_public_reviews_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- public_users_games.user_id
+ALTER TABLE public_users_games
+DROP CONSTRAINT IF EXISTS FK_public_users_games_user;
+
+ALTER TABLE public_users_games
+ADD CONSTRAINT FK_public_users_games_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- hrbac_users_roles.user_id
+ALTER TABLE hrbac_users_roles
+DROP CONSTRAINT IF EXISTS FK_hrbac_users_roles_user;
+
+ALTER TABLE hrbac_users_roles
+ADD CONSTRAINT FK_hrbac_users_roles_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- public_publishers_games.user_id
+ALTER TABLE public_publishers_games
+DROP CONSTRAINT IF EXISTS FK_public_publishers_games_user;
+
+ALTER TABLE public_publishers_games
+ADD CONSTRAINT FK_public_publishers_games_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- public_developers_games.user_id
+ALTER TABLE public_developers_games
+DROP CONSTRAINT IF EXISTS FK_public_developers_games_user;
+
+ALTER TABLE public_developers_games
+ADD CONSTRAINT FK_public_developers_games_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+-- public_studios.user_id (SET NULL)
+ALTER TABLE public_studios
+DROP CONSTRAINT IF EXISTS FK_public_studios_user;
+
+ALTER TABLE public_studios
+ADD CONSTRAINT FK_public_studios_user
+FOREIGN KEY (user_id)
+REFERENCES public_users(id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
+SQL;
+
+        $pdo->exec($cascadeSql);
+
+
         // 2. Seed-Daten einfügen (nur wenn Tabelle leer)
         foreach ($seeds as $table => $sql) {
             if (tableIsEmpty($pdo, $table)) {
                 $pdo->exec($sql);
             }
         }
+
+
 
         $pdo->commit();
         $message = "Setup erfolgreich ausgeführt auf Datenbank '$selectedDb'.";
