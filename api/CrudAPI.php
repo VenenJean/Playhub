@@ -4,11 +4,37 @@ class CrudAPI
 {
     private $pdo;
     private $table;
+    private $context;
 
-    public function __construct(PDO $pdo, string $table)
+    public function __construct(PDO $pdo, string $table, array $context = [])
     {
         $this->pdo = $pdo;
         $this->table = $table;
+        $this->context = $context;
+    }
+
+    /**
+     * Write a log row (best-effort; failures must never break CRUD).
+     */
+    private function writeLog(string $action, $recordId = null, $oldData = null, $newData = null): void
+    {
+        // Avoid recursion if someone ever edits the log table itself
+        if (strtolower($this->table) === 'admin_logs') return;
+
+        try {
+            $sql = "INSERT INTO admin_logs (action, table_name, user_agent, old_data, new_data)
+                    VALUES (:action, :table_name, :user_agent, :old_data, :new_data)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                'action'     => $action,
+                'table_name' => $this->table,
+                'user_agent' => $this->context['user_agent'] ?? null,
+                'old_data'   => $oldData !== null ? json_encode($oldData, JSON_UNESCAPED_UNICODE) : null,
+                'new_data'   => $newData !== null ? json_encode($newData, JSON_UNESCAPED_UNICODE) : null,
+            ]);
+        } catch (Throwable $e) {
+            // Swallow errors (e.g., log table missing) so the API keeps working.
+        }
     }
 
     /** Get table columns dynamically (MSSQL VERSION) */
@@ -42,12 +68,16 @@ class CrudAPI
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($data);
 
+        $id = null;
         if ($stmt->columnCount() > 0) {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return ["id" => $result["id"] ?? null];
+            $id = $result["id"] ?? null;
+        } else {
+            $id = $this->pdo->lastInsertId();
         }
 
-        return ["id" => $this->pdo->lastInsertId()];
+        $this->writeLog('CREATE', $id, null, $data);
+        return ["id" => $id];
     }
 
     /** READ ALL */
@@ -68,6 +98,8 @@ class CrudAPI
     /** UPDATE */
     public function update($id, array $data)
     {
+        $before = $this->read($id);
+
         $columns = $this->getColumns();
         $data = array_intersect_key($data, array_flip($columns));
 
@@ -78,13 +110,27 @@ class CrudAPI
         $data["id"] = $id;
 
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($data);
+        $ok = $stmt->execute($data);
+
+        if ($ok) {
+            $after = $this->read($id);
+            $this->writeLog('UPDATE', $id, $before, $after);
+        }
+
+        return $ok;
     }
 
     /** DELETE */
     public function delete($id)
     {
+        $before = $this->read($id);
         $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE id = ?");
-        return $stmt->execute([$id]);
+        $ok = $stmt->execute([$id]);
+
+        if ($ok) {
+            $this->writeLog('DELETE', $id, $before, null);
+        }
+
+        return $ok;
     }
 }

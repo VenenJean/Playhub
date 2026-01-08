@@ -58,6 +58,19 @@ function tableIsEmpty(PDO $pdo, string $table): bool
 
 // Tabellendefinitionen
 $tables = [
+    // ✅ NEU: Admin Logs
+    "admin_logs" => <<<SQL
+CREATE TABLE admin_logs (
+    id INT PRIMARY KEY IDENTITY (1, 1),
+    log_datetime DATETIME NOT NULL DEFAULT GETDATE(),
+    action NVARCHAR(20) NOT NULL,
+    table_name NVARCHAR(255) NOT NULL,
+    user_agent NVARCHAR(255) NULL,
+    old_data NVARCHAR(MAX) NULL,
+    new_data NVARCHAR(MAX) NULL
+);
+SQL,
+
     "public_users" => <<<SQL
 CREATE TABLE public_users (
     id INT PRIMARY KEY IDENTITY (1,1),
