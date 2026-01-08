@@ -156,13 +156,9 @@ CREATE TABLE
 CREATE TABLE
     admin_logs (
         id INT PRIMARY KEY IDENTITY (1, 1),
-        log_datetime DATETIME NOT NULL DEFAULT GETDATE(),
-        action NVARCHAR(20) NOT NULL,
-        table_name NVARCHAR(255) NOT NULL,
-        record_id INT NULL,
-        actor NVARCHAR(255) NULL,
-        ip NVARCHAR(45) NULL,
-        user_agent NVARCHAR(255) NULL,
-        old_data NVARCHAR(MAX) NULL,
-        new_data NVARCHAR(MAX) NULL
+        log_datetime DATETIME NOT NULL DEFAULT GETDATE (),
+        action NVARCHAR (20) NOT NULL,
+        table_name NVARCHAR (255) NOT NULL,
+        old_data NVARCHAR (MAX) NULL,
+        new_data NVARCHAR (MAX) NULL
     );

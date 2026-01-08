@@ -22,15 +22,12 @@ class CrudAPI
         if (strtolower($this->table) === 'admin_logs') return;
 
         try {
-            $sql = "INSERT INTO admin_logs (action, table_name, record_id, actor, ip, user_agent, old_data, new_data)
-                    VALUES (:action, :table_name, :record_id, :actor, :ip, :user_agent, :old_data, :new_data)";
+            $sql = "INSERT INTO admin_logs (action, table_name, user_agent, old_data, new_data)
+                    VALUES (:action, :table_name, :user_agent, :old_data, :new_data)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 'action'     => $action,
                 'table_name' => $this->table,
-                'record_id'  => $recordId,
-                'actor'      => $this->context['actor'] ?? null,
-                'ip'         => $this->context['ip'] ?? null,
                 'user_agent' => $this->context['user_agent'] ?? null,
                 'old_data'   => $oldData !== null ? json_encode($oldData, JSON_UNESCAPED_UNICODE) : null,
                 'new_data'   => $newData !== null ? json_encode($newData, JSON_UNESCAPED_UNICODE) : null,
@@ -102,6 +99,7 @@ class CrudAPI
     public function update($id, array $data)
     {
         $before = $this->read($id);
+
         $columns = $this->getColumns();
         $data = array_intersect_key($data, array_flip($columns));
 

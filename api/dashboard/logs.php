@@ -67,9 +67,6 @@ try {
                 <th>time</th>
                 <th>action</th>
                 <th>table</th>
-                <th>record_id</th>
-                <th>actor</th>
-                <th>ip</th>
                 <th>old_data</th>
                 <th>new_data</th>
             </tr>
@@ -80,9 +77,6 @@ try {
                     <td><?= htmlspecialchars((string)($row['log_datetime'] ?? '')) ?></td>
                     <td><?= htmlspecialchars((string)($row['action'] ?? '')) ?></td>
                     <td><?= htmlspecialchars((string)($row['table_name'] ?? '')) ?></td>
-                    <td><?= htmlspecialchars((string)($row['record_id'] ?? '')) ?></td>
-                    <td><?= htmlspecialchars((string)($row['actor'] ?? '')) ?></td>
-                    <td><?= htmlspecialchars((string)($row['ip'] ?? '')) ?></td>
                     <td><div class="log-json"><?= htmlspecialchars((string)($row['old_data'] ?? '')) ?></div></td>
                     <td><div class="log-json"><?= htmlspecialchars((string)($row['new_data'] ?? '')) ?></div></td>
                 </tr>
